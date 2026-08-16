@@ -1,0 +1,21 @@
+User-agent: *
+
+# Private and transactional areas — nothing to index here.
+Disallow: /cart
+Disallow: /checkout
+Disallow: /account
+Disallow: /orders
+Disallow: /seller
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+
+# Search results are infinite and thin; category pages are the ones that
+# should rank. Faceted URLs are also noindex at the page level.
+Disallow: /search
+Disallow: /*?sort=
+Disallow: /*?brand=
+Disallow: /*?min=
+Disallow: /*?max=
+
+Sitemap: https://banha.shop/sitemap.xml

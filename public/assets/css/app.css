@@ -1,0 +1,1025 @@
+/* ==========================================================================
+   Banha.shop design system
+   Arabic-first, RTL-native, mobile-first. Hand-written: no framework, no
+   build step, no utility soup. Logical properties throughout so the layout is
+   genuinely RTL rather than a mirrored LTR grid.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Tokens
+   -------------------------------------------------------------------------- */
+:root {
+  --ink:        #14181d;
+  --ink-2:      #4c5561;
+  --ink-3:      #79828f;
+  --line:       #e3e6ea;
+  --line-2:     #eef0f3;
+  --surface:    #ffffff;
+  --canvas:     #f6f7f9;
+  --canvas-2:   #f0f2f5;
+
+  --brand:      #0b5c4b;
+  --brand-ink:  #084438;
+  --brand-tint: #eaf4f1;
+
+  --good:       #14713f;
+  --good-tint:  #e9f4ed;
+  --warn:       #9a5b09;
+  --warn-tint:  #fdf3e4;
+  --bad:        #ad2b21;
+  --bad-tint:   #fbecea;
+  --info-tint:  #eef2f8;
+
+  --radius:     6px;
+  --radius-sm:  4px;
+  --radius-lg:  10px;
+
+  /* One control-height scale for the entire product. Every interactive
+     control — button, input, select, pill, pagination link — resolves to one
+     of these three values, so nothing sits a few pixels off its neighbour. */
+  --control-sm: 34px;
+  --control:    40px;
+  --control-lg: 46px;
+
+  --shadow-pop: 0 6px 24px rgba(20, 24, 29, .12);
+  --shadow-bar: 0 -1px 0 var(--line), 0 -8px 24px rgba(20, 24, 29, .06);
+
+  --container:  1180px;
+  --header-h:   60px;
+
+  --font: system-ui, "SF Arabic", "Segoe UI", "Noto Sans Arabic",
+          "IBM Plex Sans Arabic", Tahoma, "Geeza Pro", sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   2. Reset & base
+   -------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img, svg, video { max-width: 100%; height: auto; display: block; }
+img { background: var(--canvas-2); }
+
+h1, h2, h3, h4 { margin: 0; line-height: 1.3; font-weight: 700; letter-spacing: -0.01em; }
+h1 { font-size: clamp(1.4rem, 1.1rem + 1.4vw, 1.9rem); }
+h2 { font-size: clamp(1.15rem, 1rem + .7vw, 1.35rem); }
+h3 { font-size: 1.02rem; }
+p  { margin: 0 0 .75rem; }
+p:last-child { margin-bottom: 0; }
+
+a { color: inherit; text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+button { font: inherit; color: inherit; }
+
+hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+::selection { background: var(--brand-tint); }
+
+/* Accessible-but-invisible: used for column labels that the layout already
+   communicates visually on wide screens. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.skip-link {
+  position: absolute; inset-block-start: -100px; inset-inline-start: 1rem;
+  z-index: 100; background: var(--ink); color: #fff;
+  padding: .6rem 1rem; border-radius: 0 0 var(--radius) var(--radius);
+}
+.skip-link:focus { inset-block-start: 0; }
+
+/* --------------------------------------------------------------------------
+   3. Layout
+   -------------------------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+.page { padding-block: 20px 56px; }
+.page--tight { padding-block: 16px 40px; }
+
+.stack > * + * { margin-block-start: var(--gap, 16px); }
+.stack-8  { --gap: 8px; }
+.stack-12 { --gap: 12px; }
+.stack-24 { --gap: 24px; }
+.stack-32 { --gap: 32px; }
+
+.row { display: flex; align-items: center; gap: 10px; }
+.row--between { justify-content: space-between; }
+.row--wrap { flex-wrap: wrap; }
+.row--top { align-items: flex-start; }
+
+.grid { display: grid; gap: 16px; }
+
+.split {
+  display: grid;
+  gap: 24px;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .split { grid-template-columns: minmax(0, 1fr) 320px; }
+  .split--wide-aside { grid-template-columns: minmax(0, 1fr) 360px; }
+  .split--aside-first { grid-template-columns: 240px minmax(0, 1fr); }
+}
+
+.section { margin-block-start: 36px; }
+.section__head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; margin-block-end: 14px;
+}
+.section__head h2 { margin: 0; }
+.section__link { color: var(--brand); font-size: .88rem; font-weight: 600; white-space: nowrap; }
+
+/* --------------------------------------------------------------------------
+   4. Type helpers
+   -------------------------------------------------------------------------- */
+.muted   { color: var(--ink-2); }
+.dim     { color: var(--ink-3); }
+.small   { font-size: .85rem; }
+.xsmall  { font-size: .78rem; }
+.strong  { font-weight: 700; }
+.nowrap  { white-space: nowrap; }
+.lead    { font-size: 1.02rem; color: var(--ink-2); }
+.num     { font-variant-numeric: tabular-nums; }
+
+.clamp-2 {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   5. Surfaces
+   -------------------------------------------------------------------------- */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+.panel__head {
+  padding: 14px 16px;
+  border-block-end: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.panel__head h2, .panel__head h3 { font-size: 1rem; margin: 0; }
+.panel__body { padding: 16px; }
+.panel__foot {
+  padding: 14px 16px;
+  border-block-start: 1px solid var(--line);
+  background: var(--canvas);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* --------------------------------------------------------------------------
+   6. Buttons
+   -------------------------------------------------------------------------- */
+.btn {
+  --btn-bg: var(--surface);
+  --btn-fg: var(--ink);
+  --btn-bd: var(--line);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 9px 16px;
+  min-height: var(--control);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border: 1px solid var(--btn-bd);
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: .92rem;
+  cursor: pointer;
+  transition: background-color .12s ease, border-color .12s ease, color .12s ease;
+  text-align: center;
+}
+.btn:hover { text-decoration: none; background: var(--canvas); }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+
+.btn--primary { --btn-bg: var(--brand); --btn-fg: #fff; --btn-bd: var(--brand); }
+.btn--primary:hover { --btn-bg: var(--brand-ink); --btn-bd: var(--brand-ink); }
+
+.btn--dark { --btn-bg: var(--ink); --btn-fg: #fff; --btn-bd: var(--ink); }
+.btn--dark:hover { --btn-bg: #000; }
+
+.btn--ghost { --btn-bd: transparent; --btn-bg: transparent; }
+.btn--danger { --btn-fg: var(--bad); --btn-bd: var(--line); }
+.btn--danger:hover { --btn-bg: var(--bad-tint); --btn-bd: var(--bad); }
+
+.btn--sm { min-height: var(--control-sm); padding: 6px 12px; font-size: .85rem; }
+.btn--lg { min-height: var(--control-lg); padding: 12px 22px; font-size: 1rem; }
+.btn--block { display: flex; width: 100%; }
+
+.btn__icon { flex: none; }
+
+/* Buttons repeated across rows of a list must be identical, never sized to
+   their own label. Any repeated action column opts in by wrapping its control
+   in .actions-cell. */
+.actions-cell { display: flex; flex-direction: column; gap: 6px; }
+.actions-cell .btn { width: 100%; }
+
+/* Icon-only controls always carry an aria-label; the class only sizes them. */
+.icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: var(--control); height: var(--control);
+  border: 1px solid transparent; border-radius: var(--radius);
+  background: transparent; cursor: pointer; color: var(--ink);
+  flex: none;
+}
+.icon-btn:hover { background: var(--canvas-2); }
+.icon-btn--sm { width: var(--control-sm); height: var(--control-sm); }
+
+/* --------------------------------------------------------------------------
+   7. Forms
+   -------------------------------------------------------------------------- */
+.field { display: block; }
+.field + .field { margin-block-start: 14px; }
+.field__label {
+  display: block; font-size: .85rem; font-weight: 600;
+  margin-block-end: 6px; color: var(--ink);
+}
+.field__hint { font-size: .78rem; color: var(--ink-3); margin-block-start: 5px; }
+.field__error { font-size: .8rem; color: var(--bad); margin-block-start: 5px; }
+
+.input, .select, .textarea {
+  width: 100%;
+  padding: 9px 12px;
+  min-height: var(--control);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font: inherit;
+  font-size: .95rem;
+}
+.input:focus, .select:focus, .textarea:focus {
+  border-color: var(--brand);
+  outline: 2px solid var(--brand-tint);
+  outline-offset: 0;
+}
+.input[aria-invalid="true"], .select[aria-invalid="true"], .textarea[aria-invalid="true"] {
+  border-color: var(--bad);
+}
+.textarea { min-height: 96px; resize: vertical; line-height: 1.6; }
+
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234c5561' d='M1.4 0 6 4.6 10.6 0 12 1.4 6 7.4 0 1.4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  /* background-position takes no logical keywords, so the chevron is the one
+     thing that has to be flipped per direction explicitly. */
+  background-position: left 12px center;
+  padding-inline-start: 12px;
+  padding-inline-end: 34px;
+}
+[dir="ltr"] .select { background-position: right 12px center; }
+[dir="ltr"] .zone-picker__select { background-position: right center; }
+
+.field-grid { display: grid; gap: 14px; }
+@media (min-width: 640px) { .field-grid--2 { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 640px) { .field-grid--3 { grid-template-columns: repeat(3, 1fr); } }
+
+.check {
+  display: flex; align-items: flex-start; gap: 9px;
+  font-size: .9rem; cursor: pointer;
+}
+.check input { margin-block-start: 4px; accent-color: var(--brand); flex: none; }
+
+/* Radio presented as a selectable block (delivery options, payment methods). */
+.choice {
+  display: flex; gap: 11px; align-items: flex-start;
+  padding: 12px 13px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  cursor: pointer; background: var(--surface);
+  transition: border-color .12s ease, background-color .12s ease;
+}
+.choice:hover { border-color: var(--ink-3); }
+.choice input { margin-block-start: 3px; accent-color: var(--brand); flex: none; }
+.choice:has(input:checked) { border-color: var(--brand); background: var(--brand-tint); }
+.choice__body { flex: 1; min-width: 0; }
+.choice__title { font-weight: 600; font-size: .92rem; }
+.choice__meta { font-size: .82rem; color: var(--ink-2); }
+.choice__price { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* --------------------------------------------------------------------------
+   8. Badges & pills
+   -------------------------------------------------------------------------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: .75rem; font-weight: 600; line-height: 1.7;
+  background: var(--canvas-2); color: var(--ink-2);
+  white-space: nowrap;
+}
+.badge--good    { background: var(--good-tint); color: var(--good); }
+.badge--warn    { background: var(--warn-tint); color: var(--warn); }
+.badge--bad     { background: var(--bad-tint);  color: var(--bad); }
+.badge--info    { background: var(--info-tint); color: #2c4a7c; }
+.badge--brand   { background: var(--brand-tint); color: var(--brand-ink); }
+.badge--outline { background: transparent; border: 1px solid var(--line); color: var(--ink-2); }
+
+.pill-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: var(--control-sm);
+  padding: 5px 13px;
+  border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); font-size: .85rem; font-weight: 600;
+  color: var(--ink-2); cursor: pointer;
+}
+.pill:hover { text-decoration: none; border-color: var(--ink-3); color: var(--ink); }
+.pill[aria-current="true"], .pill--active {
+  background: var(--ink); border-color: var(--ink); color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   9. Header
+   -------------------------------------------------------------------------- */
+.site-header { background: var(--surface); }
+
+/* Only the top bar sticks. Pinning the category nav too would cost a phone
+   ~100px of screen on every scroll, for navigation it already scrolled past. */
+.site-header__top {
+  position: sticky; inset-block-start: 0; z-index: 40;
+  background: var(--surface);
+  border-block-end: 1px solid var(--line);
+}
+.site-header__bar {
+  display: flex; align-items: center; gap: 12px;
+  min-height: var(--header-h);
+  padding-block: 8px;
+}
+
+.brand { display: inline-flex; align-items: center; gap: 9px; flex: none; }
+.brand:hover { text-decoration: none; }
+.brand__mark {
+  width: 32px; height: 32px; flex: none;
+  border-radius: 8px; background: var(--brand); color: #fff;
+  display: grid; place-items: center; font-weight: 800; font-size: 1rem;
+}
+/* A flex column, not a negative margin: the two lines stay locked together
+   at any font size. */
+.brand__text { display: flex; flex-direction: column; line-height: 1.15; }
+.brand__name { font-weight: 800; font-size: 1.05rem; letter-spacing: -.02em; }
+.brand__city { font-size: .7rem; color: var(--ink-3); font-weight: 600; }
+
+/* Search is the primary entry point, but letting it span a 1200px screen
+   makes the header read as an empty page. Capped, and it keeps its width
+   whether or not the zone picker is present. */
+.header-search { flex: 1 1 auto; min-width: 0; max-width: 520px; }
+.search-form { position: relative; display: flex; }
+.search-form__input {
+  width: 100%;
+  min-height: var(--control);
+  padding-block: 9px;
+  padding-inline-start: 40px;
+  padding-inline-end: 12px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--canvas); font: inherit; font-size: .92rem;
+}
+.search-form__input:focus {
+  background: var(--surface); border-color: var(--brand);
+  outline: 2px solid var(--brand-tint);
+}
+.search-form__submit {
+  position: absolute; inset-inline-start: 3px; inset-block: 3px;
+  width: var(--control-sm); border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--ink-2);
+  display: grid; place-items: center; cursor: pointer;
+}
+.search-form__submit:hover { background: var(--canvas-2); color: var(--ink); }
+
+.header-actions {
+  display: flex; align-items: center; gap: 2px; flex: none;
+  margin-inline-start: auto;
+}
+/* Logout is a POST, so one action is wrapped in a form. */
+.header-actions form { display: flex; }
+/* Works as a link or as a submit button (logout is a POST). */
+.header-action {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: var(--control); padding-inline: 10px;
+  border: 0; border-radius: var(--radius);
+  background: transparent; cursor: pointer;
+  font-size: .85rem; font-weight: 600; color: var(--ink-2);
+}
+.header-action:hover { background: var(--canvas-2); color: var(--ink); text-decoration: none; }
+.header-action__icon { position: relative; display: inline-flex; flex: none; }
+.header-action__label { white-space: nowrap; }
+/* Anchored to the icon, not the control, so it stays put with or without
+   the text label. */
+.header-action__count {
+  position: absolute; inset-block-start: -6px; inset-inline-start: -8px;
+  min-width: 17px; height: 17px; padding: 0 4px;
+  border-radius: 999px; background: var(--brand); color: #fff;
+  font-size: .68rem; font-weight: 700; line-height: 17px; text-align: center;
+}
+
+/* Zone picker — the destination every delivery price is quoted against, so it
+   is a labelled control in the header rather than a checkout afterthought. */
+.zone-picker {
+  display: flex; align-items: center; gap: 7px; flex: none;
+  height: var(--control); padding-inline: 11px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface);
+}
+.zone-picker:hover { border-color: var(--ink-3); }
+.zone-picker:focus-within { border-color: var(--brand); outline: 2px solid var(--brand-tint); }
+.zone-picker__icon { color: var(--ink-3); flex: none; }
+.zone-picker__label { font-size: .78rem; color: var(--ink-3); white-space: nowrap; }
+.zone-picker__select {
+  appearance: none; border: 0; background: transparent;
+  height: 100%; padding-inline: 0 17px;
+  font: inherit; font-size: .86rem; font-weight: 700; color: var(--ink);
+  cursor: pointer; max-width: 160px;
+  text-overflow: ellipsis;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234c5561' d='M1.4 0 6 4.6 10.6 0 12 1.4 6 7.4 0 1.4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: left center;
+}
+.zone-picker__select:focus-visible { outline: none; }
+
+.nav-bar { border-block-end: 1px solid var(--line); background: var(--surface); }
+.nav-bar__list {
+  display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none;
+  padding-block: 2px;
+}
+.nav-bar__list::-webkit-scrollbar { display: none; }
+.nav-bar__link {
+  display: block;
+  padding: 9px 12px; font-size: .88rem; font-weight: 600; color: var(--ink-2);
+  white-space: nowrap; border-block-end: 2px solid transparent;
+}
+.nav-bar__link:hover { color: var(--ink); text-decoration: none; }
+.nav-bar__link[aria-current="page"] { color: var(--ink); border-block-end-color: var(--brand); }
+
+/* Below this width the action labels stop earning their space. */
+@media (max-width: 1023px) {
+  .header-action__label { display: none; }
+  .header-action { padding-inline: 8px; }
+  .zone-picker__label { display: none; }
+}
+
+@media (max-width: 767px) {
+  .site-header__bar { flex-wrap: wrap; }
+  /* Row 1: brand, zone, actions. Row 2: search, full width. */
+  .brand { order: 1; }
+  .zone-picker { order: 2; }
+  .header-actions { order: 3; }
+  .header-search { order: 4; flex-basis: 100%; max-width: none; }
+  .zone-picker { padding-inline: 9px; gap: 5px; }
+  .zone-picker__select { max-width: 118px; font-size: .82rem; }
+}
+
+@media (max-width: 380px) {
+  .brand__city { display: none; }
+  .zone-picker__select { max-width: 92px; }
+}
+
+/* --------------------------------------------------------------------------
+   10. Breadcrumbs
+   -------------------------------------------------------------------------- */
+.breadcrumbs { font-size: .82rem; color: var(--ink-3); margin-block-end: 14px; }
+.breadcrumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.breadcrumbs li { display: flex; align-items: center; gap: 6px; }
+.breadcrumbs li + li::before {
+  content: "/"; color: var(--line); font-size: .9em;
+}
+.breadcrumbs a:hover { color: var(--ink); }
+.breadcrumbs [aria-current="page"] { color: var(--ink-2); }
+
+/* --------------------------------------------------------------------------
+   11. Product cards
+   -------------------------------------------------------------------------- */
+.product-grid {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 640px)  { .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; } }
+@media (min-width: 1000px) { .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; } }
+.product-grid--wide { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 900px) { .product-grid--wide { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.product-card {
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color .12s ease;
+}
+.product-card:hover { border-color: var(--ink-3); }
+.product-card__media {
+  aspect-ratio: 1 / 1; background: var(--canvas-2);
+  display: grid; place-items: center; overflow: hidden;
+}
+.product-card__media img { width: 100%; height: 100%; object-fit: contain; padding: 10px; }
+.product-card__body { padding: 11px 12px 13px; display: flex; flex-direction: column; flex: 1; gap: 4px; }
+.product-card__brand { font-size: .74rem; color: var(--ink-3); font-weight: 600; }
+.product-card__title {
+  font-size: .9rem; font-weight: 600; line-height: 1.45; color: var(--ink);
+  min-height: 2.6em;
+}
+.product-card a.product-card__title:hover { text-decoration: underline; }
+.product-card__price { margin-block-start: auto; padding-block-start: 6px; }
+.product-card__from { font-size: .72rem; color: var(--ink-3); }
+.product-card__amount { font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.product-card__offers { font-size: .76rem; color: var(--brand-ink); font-weight: 600; }
+.product-card__empty { font-size: .76rem; color: var(--ink-3); }
+
+/* Placeholder for products with no photograph yet. Neutral by design — a
+   generic stock image would misrepresent the product. */
+.thumb-fallback {
+  display: grid; place-items: center;
+  width: 100%; height: 100%; min-height: 72px;
+  background: var(--canvas-2); color: var(--ink-3);
+  font-weight: 700; font-size: 1.1rem; letter-spacing: .04em;
+}
+
+/* --------------------------------------------------------------------------
+   12. Price block (product page)
+   -------------------------------------------------------------------------- */
+.price-headline { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.price-headline__amount {
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
+  font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em;
+}
+.price-headline__label { font-size: .82rem; color: var(--ink-2); }
+.price-was {
+  color: var(--ink-3); text-decoration: line-through; font-size: .9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   13. Offer comparison
+   The desktop table and the mobile cards are the same markup: a list of rows
+   on a shared grid. Labels are visible on mobile and hidden on desktop where
+   the column header already says what each number is.
+   -------------------------------------------------------------------------- */
+.offers { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
+
+.offers__toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+  padding: 12px 14px; border-block-end: 1px solid var(--line);
+}
+.offers__count { font-size: .88rem; font-weight: 600; }
+.offers__sorts { display: flex; gap: 6px; flex-wrap: wrap; }
+.offers__sort {
+  display: inline-flex; align-items: center;
+  min-height: var(--control-sm);
+  padding: 5px 13px; border-radius: 999px; font-size: .82rem; font-weight: 600;
+  border: 1px solid var(--line); color: var(--ink-2); background: var(--surface);
+}
+.offers__sort:hover { text-decoration: none; border-color: var(--ink-3); color: var(--ink); }
+.offers__sort[aria-current="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+.offers__head {
+  display: none;
+  padding: 8px 14px;
+  background: var(--canvas);
+  border-block-end: 1px solid var(--line);
+  font-size: .76rem; font-weight: 700; color: var(--ink-3);
+  letter-spacing: .01em;
+}
+
+.offer-row {
+  display: grid;
+  gap: 4px 14px;
+  padding: 14px;
+  border-block-end: 1px solid var(--line-2);
+  grid-template-columns: 1fr auto;
+  align-items: start;
+}
+.offer-row:last-child { border-block-end: 0; }
+.offer-row--best { background: var(--good-tint); }
+.offer-row--best .offer-row__total { color: var(--good); }
+
+.offer-row__store { grid-column: 1 / -1; display: flex; align-items: center; gap: 9px; }
+.offer-row__logo {
+  width: 34px; height: 34px; flex: none; border-radius: var(--radius-sm);
+  background: var(--canvas-2); object-fit: contain;
+  display: grid; place-items: center; font-weight: 700; color: var(--ink-2);
+  font-size: .8rem; border: 1px solid var(--line);
+}
+.offer-row__name { font-weight: 700; font-size: .95rem; }
+.offer-row__name:hover { text-decoration: underline; }
+.offer-row__store-meta { font-size: .76rem; color: var(--ink-3); display: flex; gap: 8px; flex-wrap: wrap; }
+
+.offer-row__figures {
+  grid-column: 1 / -1;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 14px;
+  margin-block-start: 8px;
+  padding-block-start: 10px;
+  border-block-start: 1px dashed var(--line);
+}
+.offer-cell { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.offer-cell__label { font-size: .8rem; color: var(--ink-2); }
+.offer-cell__value { font-size: .92rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.offer-row__total { font-size: 1.12rem; font-weight: 800; }
+
+.offer-row__action { grid-column: 1 / -1; margin-block-start: 10px; }
+.offer-row__action .btn { width: 100%; }
+.offer-row__flags { display: flex; flex-wrap: wrap; gap: 6px; margin-block-start: 7px; }
+
+@media (min-width: 860px) {
+  /* One shared track definition for the header and every row, with fixed
+     end columns. Rows are separate grid containers (they need their own
+     background and border), so the tracks must be deterministic rather than
+     content-sized — otherwise columns and buttons drift row to row. */
+  .offers__head, .offer-row {
+    grid-template-columns:
+      minmax(0, 1fr)   /* store            */
+      130px            /* product price    */
+      120px            /* delivery         */
+      140px            /* total            */
+      150px            /* delivery promise */
+      152px;           /* action           */
+    align-items: center;
+    gap: 14px;
+  }
+  .offers__head { display: grid; }
+  .offer-row__store { grid-column: auto; }
+  .offer-row__figures { display: contents; }
+  .offer-cell { display: block; min-width: 0; }
+  .offer-cell__label { display: none; }
+  .offer-row__action { grid-column: auto; margin-block-start: 0; }
+  .offer-row__flags { margin-block-start: 4px; }
+}
+
+/* The teaching moment: cheapest sticker price is not always the best deal. */
+.deal-note {
+  display: flex; gap: 9px; align-items: flex-start;
+  padding: 11px 13px; margin-block-start: 12px;
+  background: var(--brand-tint); border: 1px solid #cfe3dd;
+  border-radius: var(--radius); font-size: .86rem; color: var(--brand-ink);
+}
+.deal-note svg { flex: none; margin-block-start: 2px; }
+
+/* --------------------------------------------------------------------------
+   14. Inventory freshness
+   -------------------------------------------------------------------------- */
+.freshness { display: inline-flex; align-items: center; gap: 5px; font-size: .76rem; color: var(--ink-3); }
+.freshness--stale { color: var(--warn); }
+.freshness__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--good); flex: none; }
+.freshness--stale .freshness__dot { background: var(--warn); }
+
+/* --------------------------------------------------------------------------
+   15. Seller card
+   -------------------------------------------------------------------------- */
+.seller-card {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+}
+.seller-card__logo {
+  width: 46px; height: 46px; flex: none; border-radius: var(--radius);
+  border: 1px solid var(--line); background: var(--canvas-2);
+  display: grid; place-items: center; font-weight: 700; color: var(--ink-2);
+  object-fit: contain;
+}
+.seller-card__name { font-weight: 700; }
+.seller-card__meta { font-size: .82rem; color: var(--ink-2); }
+
+/* --------------------------------------------------------------------------
+   16. Tables (dashboards)
+   -------------------------------------------------------------------------- */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.table th, .table td {
+  padding: 11px 13px; text-align: start;
+  border-block-end: 1px solid var(--line-2); vertical-align: middle;
+}
+.table th {
+  font-size: .76rem; font-weight: 700; color: var(--ink-3);
+  background: var(--canvas); border-block-end: 1px solid var(--line);
+  white-space: nowrap;
+}
+.table tbody tr:last-child td { border-block-end: 0; }
+.table tbody tr:hover { background: var(--canvas); }
+.table__num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.table__actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+/* Buttons in a table's action column are identical across every row. */
+.table__actions .btn { min-width: 92px; justify-content: center; }
+.table__actions .icon-btn { width: var(--control-sm); height: var(--control-sm); }
+
+/* --------------------------------------------------------------------------
+   17. Alerts, empty states
+   -------------------------------------------------------------------------- */
+.alert {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 12px 14px; border-radius: var(--radius);
+  border: 1px solid var(--line); background: var(--surface);
+  font-size: .89rem;
+}
+.alert svg { flex: none; margin-block-start: 2px; }
+.alert--good { background: var(--good-tint); border-color: #cbe4d5; color: #0f5230; }
+.alert--warn { background: var(--warn-tint); border-color: #f0dcbd; color: #7a4808; }
+.alert--bad  { background: var(--bad-tint);  border-color: #f3cdc9; color: #8f221a; }
+.alert--info { background: var(--info-tint); border-color: #d7e0ee; color: #2c4a7c; }
+.alert ul { margin-block-start: 5px; }
+.alert li { margin-block-start: 2px; }
+.alert li::before { content: "•"; margin-inline-end: 7px; color: currentColor; opacity: .6; }
+
+.empty {
+  padding: 32px 20px; text-align: center;
+  border: 1px dashed var(--line); border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.empty__title { font-weight: 700; font-size: 1rem; margin-block-end: 5px; }
+.empty__text { color: var(--ink-2); font-size: .9rem; max-width: 46ch; margin-inline: auto; }
+.empty__action { margin-block-start: 16px; }
+
+/* --------------------------------------------------------------------------
+   18. Pagination
+   -------------------------------------------------------------------------- */
+.pagination {
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+  margin-block-start: 28px;
+}
+.pagination__item {
+  min-width: var(--control); height: var(--control); padding: 0 11px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); font-size: .88rem; font-weight: 600; color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.pagination__item:hover { text-decoration: none; border-color: var(--ink-3); color: var(--ink); }
+.pagination__item[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.pagination__item--disabled { opacity: .45; pointer-events: none; }
+
+/* --------------------------------------------------------------------------
+   19. Sticky action bar (mobile buy bar / checkout)
+   -------------------------------------------------------------------------- */
+.sticky-bar {
+  position: sticky; inset-block-end: 0; z-index: 30;
+  background: var(--surface); box-shadow: var(--shadow-bar);
+  padding: 10px 0; margin-block-start: 24px;
+}
+.sticky-bar__inner { display: flex; align-items: center; gap: 12px; }
+.sticky-bar__total { flex: 1; min-width: 0; }
+.sticky-bar__label { font-size: .74rem; color: var(--ink-3); }
+.sticky-bar__amount { font-size: 1.1rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------------------
+   20. Order timeline
+   -------------------------------------------------------------------------- */
+.timeline { position: relative; padding-inline-start: 22px; }
+.timeline::before {
+  content: ""; position: absolute; inset-block: 6px 6px;
+  inset-inline-start: 5px; width: 2px; background: var(--line);
+}
+.timeline__item { position: relative; padding-block-end: 16px; }
+.timeline__item:last-child { padding-block-end: 0; }
+.timeline__item::before {
+  content: ""; position: absolute; inset-inline-start: -21px; inset-block-start: 7px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--line);
+}
+.timeline__item--done::before { background: var(--brand); border-color: var(--brand); }
+.timeline__title { font-weight: 600; font-size: .92rem; }
+.timeline__time { font-size: .78rem; color: var(--ink-3); }
+
+/* --------------------------------------------------------------------------
+   21. Dashboard shell
+   -------------------------------------------------------------------------- */
+.dash { display: grid; gap: 20px; align-items: start; }
+@media (min-width: 900px) { .dash { grid-template-columns: 220px minmax(0, 1fr); } }
+
+.dash-nav {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: 8px;
+}
+.dash-nav__group + .dash-nav__group { margin-block-start: 10px; padding-block-start: 10px; border-block-start: 1px solid var(--line-2); }
+.dash-nav__title {
+  font-size: .72rem; font-weight: 700; color: var(--ink-3);
+  padding: 4px 10px; letter-spacing: .02em;
+}
+.dash-nav__link {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: var(--radius);
+  font-size: .89rem; font-weight: 600; color: var(--ink-2);
+}
+.dash-nav__link:hover { background: var(--canvas); color: var(--ink); text-decoration: none; }
+.dash-nav__link[aria-current="page"] { background: var(--brand-tint); color: var(--brand-ink); }
+.dash-nav__count { margin-inline-start: auto; font-size: .76rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 899px) {
+  .dash-nav { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  .dash-nav::-webkit-scrollbar { display: none; }
+  .dash-nav__group { display: flex; gap: 6px; }
+  .dash-nav__group + .dash-nav__group { margin: 0; padding: 0; border: 0; }
+  .dash-nav__title { display: none; }
+  .dash-nav__link { white-space: nowrap; }
+  .dash-nav__count { margin-inline-start: 4px; }
+}
+
+.stat-row { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 760px) { .stat-row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.stat {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: 14px;
+}
+.stat__label { font-size: .78rem; color: var(--ink-3); font-weight: 600; }
+.stat__value { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.stat__note { font-size: .76rem; color: var(--ink-3); }
+
+/* --------------------------------------------------------------------------
+   22. Hero / home
+   -------------------------------------------------------------------------- */
+.hero {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: 22px 20px;
+}
+.hero__title { font-size: clamp(1.35rem, 1.1rem + 1.6vw, 1.85rem); letter-spacing: -.02em; }
+.hero__text { color: var(--ink-2); max-width: 58ch; margin-block-start: 8px; }
+.hero__steps {
+  display: grid; gap: 10px; margin-block-start: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 760px) { .hero__steps { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.hero__step {
+  display: flex; gap: 9px; align-items: flex-start;
+  padding: 11px 12px; border: 1px solid var(--line-2);
+  border-radius: var(--radius); background: var(--canvas);
+}
+.hero__step-num {
+  width: 21px; height: 21px; flex: none; border-radius: 50%;
+  background: var(--ink); color: #fff; font-size: .72rem; font-weight: 700;
+  display: grid; place-items: center; margin-block-start: 1px;
+}
+.hero__step-text { font-size: .84rem; font-weight: 600; line-height: 1.45; }
+
+.category-strip { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 640px)  { .category-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .category-strip { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.category-tile {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 13px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius);
+}
+.category-tile:hover { text-decoration: none; border-color: var(--ink-3); }
+.category-tile__name { font-weight: 600; font-size: .89rem; }
+.category-tile__count { font-size: .76rem; color: var(--ink-3); }
+
+/* --------------------------------------------------------------------------
+   23. Product page specifics
+   -------------------------------------------------------------------------- */
+.product-hero { display: grid; gap: 20px; }
+@media (min-width: 800px) { .product-hero { grid-template-columns: minmax(0, 420px) minmax(0, 1fr); } }
+
+.gallery__main {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); aspect-ratio: 1 / 1;
+  display: grid; place-items: center; overflow: hidden;
+}
+.gallery__main img { width: 100%; height: 100%; object-fit: contain; padding: 16px; }
+.gallery__thumbs { display: flex; gap: 8px; margin-block-start: 10px; overflow-x: auto; scrollbar-width: none; }
+.gallery__thumbs::-webkit-scrollbar { display: none; }
+.gallery__thumb {
+  width: 62px; height: 62px; flex: none; padding: 4px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); object-fit: contain;
+}
+
+.specs { display: grid; gap: 0; }
+.specs__item {
+  display: grid; grid-template-columns: minmax(110px, 34%) 1fr;
+  gap: 12px; padding: 9px 0; border-block-end: 1px solid var(--line-2);
+  font-size: .89rem;
+}
+.specs__item:last-child { border-block-end: 0; }
+.specs__label { color: var(--ink-2); }
+.specs__value { font-weight: 600; }
+
+.highlights li {
+  display: flex; gap: 9px; align-items: flex-start;
+  font-size: .9rem; padding-block: 3px;
+}
+.highlights svg { flex: none; margin-block-start: 4px; color: var(--brand); }
+
+.variant-list { display: flex; flex-wrap: wrap; gap: 7px; }
+.variant {
+  padding: 7px 13px; border: 1px solid var(--line); border-radius: var(--radius);
+  font-size: .85rem; font-weight: 600; background: var(--surface); color: var(--ink-2);
+}
+.variant:hover { text-decoration: none; border-color: var(--ink-3); color: var(--ink); }
+.variant[aria-current="page"] { border-color: var(--ink); color: var(--ink); background: var(--canvas-2); }
+
+/* --------------------------------------------------------------------------
+   24. Cart & checkout
+   -------------------------------------------------------------------------- */
+.cart-group + .cart-group { margin-block-start: 16px; }
+.cart-line {
+  display: grid; gap: 12px;
+  grid-template-columns: 72px minmax(0, 1fr);
+  padding: 14px; border-block-end: 1px solid var(--line-2);
+}
+.cart-line:last-of-type { border-block-end: 0; }
+.cart-line__media {
+  width: 72px; height: 72px; border: 1px solid var(--line);
+  border-radius: var(--radius); background: var(--canvas-2);
+  object-fit: contain; padding: 5px;
+}
+.cart-line__title { font-weight: 600; font-size: .92rem; }
+.cart-line__foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-block-start: 9px; flex-wrap: wrap;
+}
+.qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: var(--radius); }
+.qty button {
+  width: 34px; height: var(--control-sm); border: 0; background: transparent;
+  cursor: pointer; color: var(--ink-2); display: grid; place-items: center;
+}
+.qty button:hover { background: var(--canvas-2); color: var(--ink); }
+.qty__value {
+  min-width: 34px; text-align: center; font-weight: 600; font-size: .88rem;
+  font-variant-numeric: tabular-nums;
+  border-inline: 1px solid var(--line); line-height: var(--control-sm);
+}
+
+.totals { font-size: .92rem; }
+.totals__line { display: flex; justify-content: space-between; gap: 12px; padding-block: 6px; }
+.totals__line--grand {
+  border-block-start: 1px solid var(--line); margin-block-start: 6px; padding-block-start: 12px;
+  font-size: 1.05rem; font-weight: 800;
+}
+.totals__value { font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------------------
+   25. Footer
+   -------------------------------------------------------------------------- */
+.site-footer {
+  margin-block-start: 56px; background: var(--surface);
+  border-block-start: 1px solid var(--line); padding-block: 32px 24px;
+}
+.site-footer__grid { display: grid; gap: 24px; }
+@media (min-width: 760px) { .site-footer__grid { grid-template-columns: 1.6fr 1fr 1fr 1fr; } }
+.site-footer__title { font-size: .82rem; font-weight: 700; margin-block-end: 9px; }
+.site-footer__list li { padding-block: 3px; }
+.site-footer__list a { font-size: .86rem; color: var(--ink-2); }
+.site-footer__list a:hover { color: var(--ink); }
+.site-footer__legal {
+  margin-block-start: 24px; padding-block-start: 16px;
+  border-block-start: 1px solid var(--line-2);
+  font-size: .8rem; color: var(--ink-3);
+  display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   26. Auth pages
+   -------------------------------------------------------------------------- */
+.auth { max-width: 420px; margin-inline: auto; padding-block: 40px; }
+.auth__title { text-align: center; margin-block-end: 6px; }
+.auth__sub { text-align: center; color: var(--ink-2); font-size: .9rem; margin-block-end: 22px; }
+.auth__foot { text-align: center; margin-block-start: 18px; font-size: .88rem; color: var(--ink-2); }
+.auth__foot a { color: var(--brand); font-weight: 600; }
+
+/* --------------------------------------------------------------------------
+   27. Disclosure (progressive detail, no JS)
+   -------------------------------------------------------------------------- */
+details > summary {
+  list-style: none;
+  color: var(--brand);
+}
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before {
+  content: "+";
+  display: inline-block;
+  margin-inline-end: 7px;
+  font-weight: 700;
+}
+details[open] > summary::before { content: "−"; }
+
+/* --------------------------------------------------------------------------
+   28. Print / motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
