@@ -9,6 +9,7 @@
 
     <x-seo :seo="$seo" />
 
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
     <link rel="stylesheet" href="{{ asset_v('assets/css/app.css') }}">
 </head>
@@ -21,10 +22,11 @@
         <div class="site-header__top">
             <div class="container site-header__bar">
                 <a href="{{ route('home') }}" class="brand">
-                    <span class="brand__mark" aria-hidden="true">ب</span>
+                    <img src="{{ asset('assets/img/logo-mark.svg') }}" alt="" class="brand__mark"
+                         width="34" height="34" decoding="async">
                     <span class="brand__text">
                         <span class="brand__name">بنها شوب</span>
-                        <span class="brand__city">{{ $nav === 'admin' ? 'لوحة الإدارة' : 'لوحة المتجر' }}</span>
+                        <span class="brand__sub">{{ $nav === 'admin' ? 'لوحة الإدارة' : 'لوحة المتجر' }}</span>
                     </span>
                 </a>
 

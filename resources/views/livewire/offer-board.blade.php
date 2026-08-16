@@ -11,6 +11,7 @@
 <div wire:poll.45s.visible="refreshBoard">
     @if ($board->isEmpty())
         <x-ui.empty
+            illustration="no-offers"
             title="لا توجد عروض متاحة لهذا المنتج حاليًا"
             text="لسه مفيش متجر في {{ config('banha.city') }} عارض المنتج ده. اطلبه وهنتواصل مع المتاجر المحلية لتوفيره."
         >
@@ -23,7 +24,7 @@
     @else
         @if ($addedLabel)
             <x-ui.alert tone="good" style="margin-block-end:12px">
-                تمت إضافة "{{ $addedLabel }}" إلى السلة.
+                تمت إضافة «{{ $addedLabel }}» إلى السلة.
                 <a href="{{ route('cart.index') }}" class="strong">افتح السلة</a>
             </x-ui.alert>
         @endif
@@ -35,7 +36,7 @@
         <section class="offers" aria-labelledby="offers-heading">
             <div class="offers__toolbar">
                 <h2 class="offers__count" id="offers-heading">
-                    {{ $board->count() }} {{ $board->count() === 1 ? 'عرض متاح' : 'عروض متاحة' }}
+                    {{ arabic_count($board->count(), 'عرض واحد متاح', 'عرضين متاحين', 'عروض متاحة', 'عرضًا متاحًا') }}
                     @if ($zone)
                         <span class="muted small">— الأسعار شاملة التوصيل إلى {{ $zone->name }}</span>
                     @endif

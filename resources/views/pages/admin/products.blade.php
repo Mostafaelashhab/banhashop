@@ -13,6 +13,13 @@
         </x-ui.alert>
     @endif
 
+    @if ($withoutImageCount > 0 && ! request()->boolean('no_image'))
+        <x-ui.alert tone="info" style="margin-block-end:16px">
+            {{ $withoutImageCount }} منتج من غير صورة — بيظهروا في الكتالوج بمربّع فاضي.
+            <a href="{{ route('admin.products.index', ['no_image' => 1]) }}">اعرضهم</a>.
+        </x-ui.alert>
+    @endif
+
     <form method="GET" class="row row--wrap" style="gap:8px;margin-block-end:16px">
         <label for="prod-q" class="sr-only">ابحث</label>
         <input type="search" id="prod-q" name="q" class="input" style="max-width:260px"
@@ -25,6 +32,11 @@
                 <option value="{{ $status->value }}" @selected(request('status') === $status->value)>{{ $status->label() }}</option>
             @endforeach
         </select>
+
+        <label class="check">
+            <input type="checkbox" name="no_image" value="1" @checked(request()->boolean('no_image'))>
+            <span>من غير صورة</span>
+        </label>
 
         <button type="submit" class="btn btn--sm">تصفية</button>
     </form>
@@ -51,6 +63,9 @@
                             <tr>
                                 <td>
                                     <span class="strong">{{ $product->displayName() }}</span>
+                                    @unless ($product->image_path)
+                                        <x-ui.badge tone="outline">بدون صورة</x-ui.badge>
+                                    @endunless
                                     @if ($product->rejection_reason)
                                         <div class="xsmall" style="color:var(--bad)">{{ $product->rejection_reason }}</div>
                                     @endif

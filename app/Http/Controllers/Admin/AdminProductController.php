@@ -28,6 +28,7 @@ class AdminProductController extends Controller
             ->with(['brand:id,name', 'category:id,name'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->string('q').'%'))
+            ->when($request->boolean('no_image'), fn ($q) => $q->whereNull('image_path'))
             // Pending submissions first — this screen is a work queue.
             ->orderByRaw("FIELD(status, 'pending', 'draft', 'published', 'rejected')")
             ->orderByDesc('id')
@@ -38,6 +39,9 @@ class AdminProductController extends Controller
             'products' => $products,
             'statuses' => ProductStatus::cases(),
             'pendingCount' => Product::where('status', ProductStatus::Pending)->count(),
+            // A product with no photograph renders as an empty grey square in
+            // the catalog, so the gap is a work queue, not a statistic.
+            'withoutImageCount' => Product::whereNull('image_path')->count(),
         ]);
     }
 
@@ -70,7 +74,7 @@ class AdminProductController extends Controller
     {
         $seo->title('تعديل منتج')->noindex(follow: false);
 
-        $product->load('attributes');
+        $product->load(['attributes', 'images']);
 
         return view('pages.admin.product-form', [
             'product' => $product,

@@ -7,7 +7,7 @@
     @if ($sellers->isEmpty())
         <x-ui.empty title="مفيش متاجر متاحة حاليًا" text="إحنا في مرحلة ضم المتاجر المحلية." />
     @else
-        <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
+        <div class="seller-grid">
             @foreach ($sellers as $seller)
                 <x-seller.card :seller="$seller" />
             @endforeach

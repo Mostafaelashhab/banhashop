@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductRequest;
 use App\Models\Seller;
 use App\Support\Seo\JsonLd;
 use App\Support\Seo\SeoData;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -40,6 +42,27 @@ class HomeController extends Controller
                 ->where('active_offers_count', '>', 0)
                 ->orderByDesc('active_offers_count')
                 ->limit(6)->get(['id', 'name', 'slug', 'logo_path', 'is_verified', 'active_offers_count']),
+
+            // What Banha asked for and no store carries yet. This is the only
+            // section on the page built from demand rather than supply, and it
+            // is the number that recruits sellers, so it is shown as recorded —
+            // never rounded up, never seeded.
+            'demand' => ProductRequest::query()
+                ->whereNull('product_id')
+                ->whereIn('status', [ProductRequest::STATUS_OPEN, ProductRequest::STATUS_SOURCING])
+                ->groupBy('normalized_key')
+                ->orderByDesc('requests')
+                ->limit(6)
+                ->get([
+                    'normalized_key',
+                    DB::raw('MAX(query_text) as label'),
+                    DB::raw('COUNT(*) as requests'),
+                ]),
+
+            'marketplace' => [
+                'products' => Product::query()->published()->where('offers_count', '>', 0)->count(),
+                'stores' => Seller::query()->active()->where('active_offers_count', '>', 0)->count(),
+            ],
         ]);
     }
 }

@@ -5,7 +5,8 @@
         <div class="site-footer__grid">
             <div>
                 <div class="brand" style="margin-block-end:10px">
-                    <span class="brand__mark" aria-hidden="true">ب</span>
+                    <img src="{{ asset('assets/img/logo-mark.svg') }}" alt="" class="brand__mark"
+                         width="34" height="34" loading="lazy" decoding="async">
                     <span class="brand__name">بنها شوب</span>
                 </div>
                 <p class="small muted" style="max-width:38ch">

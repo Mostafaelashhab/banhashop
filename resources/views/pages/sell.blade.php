@@ -18,15 +18,15 @@
                         <h2 style="font-size:1rem">إزاي تبدأ</h2>
                         <ol class="stack-8" style="margin-block-start:10px">
                             <li class="row row--top" style="gap:9px">
-                                <span class="hero__step-num" aria-hidden="true">١</span>
+                                <span class="step-num" aria-hidden="true">١</span>
                                 <span class="small">كلمنا على {{ config('banha.support_phone') }} وهنفتح حساب المتجر بنفسنا.</span>
                             </li>
                             <li class="row row--top" style="gap:9px">
-                                <span class="hero__step-num" aria-hidden="true">٢</span>
+                                <span class="step-num" aria-hidden="true">٢</span>
                                 <span class="small">تدخل على لوحة المتجر وتدوّر على المنتج في الكتالوج.</span>
                             </li>
                             <li class="row row--top" style="gap:9px">
-                                <span class="hero__step-num" aria-hidden="true">٣</span>
+                                <span class="step-num" aria-hidden="true">٣</span>
                                 <span class="small">تضيف سعرك والكمية المتاحة — ودي كل الخطوات.</span>
                             </li>
                         </ol>

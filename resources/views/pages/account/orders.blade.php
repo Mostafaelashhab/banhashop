@@ -5,7 +5,8 @@
     </div>
 
     @if ($orders->isEmpty())
-        <x-ui.empty title="لسه مفيش طلبات" text="أول ما تطلب من متاجر {{ config('banha.city') }} هتلاقي طلباتك هنا.">
+        <x-ui.empty illustration="orders" title="لسه مفيش طلبات"
+                    text="أول ما تطلب من متاجر {{ config('banha.city') }} هتلاقي طلباتك هنا.">
             <x-slot:action>
                 <a href="{{ route('products.index') }}" class="btn btn--primary">تصفح المنتجات</a>
             </x-slot:action>
@@ -24,8 +25,7 @@
                     <div class="panel__body">
                         <div class="row row--between row--wrap">
                             <p class="small muted">
-                                {{ $order->sellerOrders->count() }}
-                                {{ $order->sellerOrders->count() === 1 ? 'متجر' : 'متاجر' }}:
+                                {{ arabic_count($order->sellerOrders->count(), 'متجر واحد', 'متجرين', 'متاجر', 'متجرًا') }}:
                                 {{ $order->sellerOrders->map(fn ($so) => $so->seller->name)->join('، ') }}
                             </p>
                             <span class="strong num">{{ money($order->grand_total_cents) }}</span>

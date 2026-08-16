@@ -17,7 +17,7 @@
                 <span class="product-card__from">يبدأ من</span>
                 <div class="product-card__amount">{{ money($product->min_price_cents) }}</div>
                 <span class="product-card__offers">
-                    {{ $product->sellers_count }} {{ $product->sellers_count === 1 ? 'متجر' : 'متاجر' }} في {{ config('banha.city') }}
+                    {{ arabic_count((int) $product->sellers_count, 'متجر واحد', 'متجرين', 'متاجر', 'متجرًا') }} في {{ config('banha.city') }}
                 </span>
             @else
                 <span class="product-card__empty">لا توجد عروض حاليًا</span>

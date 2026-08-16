@@ -36,11 +36,12 @@ class ProductQueryService
 
         $tokens = $term ? ArabicText::tokens($term) : [];
 
-        if ($tokens !== []) {
-            $this->applySearch($query, $term, $tokens);
-        }
+        // Whether the search *scored* the rows, not merely whether one was
+        // typed: the LIKE fallback projects no relevance column, and ordering
+        // by one that was never selected is a SQL error, not a bad ranking.
+        $scored = $tokens !== [] && $this->applySearch($query, $term, $tokens);
 
-        $this->applySort($query, $sort, hasTerm: $tokens !== []);
+        $this->applySort($query, $sort, hasRelevance: $scored);
 
         return $query->paginate($perPage)->withQueryString();
     }
@@ -94,16 +95,27 @@ class ProductQueryService
      * Require every token first ("+kettle* +braun*"). If that is too strict we
      * relax to any-token and let the relevance score do the ranking, so a long
      * query degrades instead of returning nothing.
+     *
+     * @return bool Whether a relevance score was projected. The LIKE fallback
+     *              has none, and the caller must not sort by it.
      */
-    private function applySearch(Builder $query, string $term, array $tokens): void
+    private function applySearch(Builder $query, string $term, array $tokens): bool
     {
-        $usable = array_filter($tokens, fn (string $t) => mb_strlen($t) >= self::MIN_FULLTEXT_TOKEN);
+        // Escaped before measuring, so "long enough for the index" is judged on
+        // what actually reaches the index. ArabicText::normalize() already drops
+        // everything outside letters, digits and spaces, so nothing survives
+        // this far to be stripped today — the ordering is here so the guarantee
+        // is local to this method rather than borrowed from the tokenizer.
+        $usable = array_values(array_filter(
+            array_map(fn (string $t) => $this->escapeToken($t), $tokens),
+            fn (string $t) => mb_strlen($t) >= self::MIN_FULLTEXT_TOKEN,
+        ));
 
         if ($usable === []) {
             $needle = '%'.ArabicText::normalize($term).'%';
             $query->where('search_text', 'like', $needle);
 
-            return;
+            return false;
         }
 
         $strict = $this->booleanExpression($usable, requireAll: true);
@@ -111,16 +123,19 @@ class ProductQueryService
         if ($this->matchCount($query, $strict) > 0) {
             $this->applyMatch($query, $strict);
 
-            return;
+            return true;
         }
 
         $this->applyMatch($query, $this->booleanExpression($usable, requireAll: false));
+
+        return true;
     }
 
+    /** Tokens arrive already escaped by applySearch(). */
     private function booleanExpression(array $tokens, bool $requireAll): string
     {
         return collect($tokens)
-            ->map(fn (string $token) => ($requireAll ? '+' : '').$this->escapeToken($token).'*')
+            ->map(fn (string $token) => ($requireAll ? '+' : '').$token.'*')
             ->implode(' ');
     }
 
@@ -145,7 +160,7 @@ class ProductQueryService
             ->count();
     }
 
-    private function applySort(Builder $query, string $sort, bool $hasTerm): void
+    private function applySort(Builder $query, string $sort, bool $hasRelevance): void
     {
         // Products nobody sells yet stay in the catalog but never outrank a
         // product a customer can actually buy today.
@@ -156,7 +171,7 @@ class ProductQueryService
             'price_desc' => $query->orderByDesc('min_price_cents'),
             'offers' => $query->orderByDesc('offers_count'),
             'newest' => $query->orderByDesc('published_at'),
-            default => $hasTerm
+            default => $hasRelevance
                 ? $query->orderByDesc('relevance')
                 : $query->orderByDesc('offers_count'),
         };

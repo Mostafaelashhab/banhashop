@@ -4,10 +4,14 @@
     <div class="site-header__top">
         <div class="container site-header__bar">
             <a href="{{ route('home') }}" class="brand" aria-label="{{ config('app.name') }} — الصفحة الرئيسية">
-                <span class="brand__mark" aria-hidden="true">ب</span>
+                <img src="{{ asset('assets/img/logo-mark.svg') }}" alt="" class="brand__mark"
+                     width="34" height="34" decoding="async">
                 <span class="brand__text">
                     <span class="brand__name">بنها شوب</span>
-                    <span class="brand__city">{{ config('banha.city') }}</span>
+                    {{-- Not the city: the brand name already ends in it, and
+                         "بنها شوب / بنها" just said the word twice. The sub-line
+                         earns its place by saying what the site is instead. --}}
+                    <span class="brand__sub">مقارنة أسعار</span>
                 </span>
             </a>
 

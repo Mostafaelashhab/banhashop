@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!--
+    Favicon build of the mark. Same geometry, thicker bars and a tighter
+    corner radius: at 16px the header proportions close up into a smudge.
+  -->
+  <rect width="64" height="64" rx="14" fill="#0b5c4b"/>
+  <rect x="12" y="19" width="40" height="10" rx="5" fill="#ffffff" fill-opacity=".55"/>
+  <rect x="12" y="35" width="25" height="10" rx="5" fill="#ffffff"/>
+</svg>

@@ -4,18 +4,31 @@
     <div class="product-hero">
         <div>
             <div class="gallery__main">
-                <x-product.thumb :product="$product" :size="560" :eager="true" />
+                <x-product.thumb :product="$product" :size="560" :eager="true"
+                                 sizes="(min-width: 800px) 420px, 92vw" />
             </div>
 
             @if ($product->images->count() > 1)
                 <div class="gallery__thumbs">
                     @foreach ($product->images as $image)
-                        <img src="{{ asset('storage/'.$image->path) }}"
+                        {{-- A 62px thumbnail has no business downloading the
+                             1200px rendition, so it asks for the narrowest one. --}}
+                        @php $rendition = \App\Support\Images\ResponsiveImage::fromPath($image->path); @endphp
+                        <img src="{{ asset('storage/'.($rendition?->pathFor($rendition->widths()[0]) ?? $image->path)) }}"
                              alt="{{ $image->alt ?? $product->displayName() }}"
                              width="62" height="62" class="gallery__thumb"
                              loading="lazy" decoding="async">
                     @endforeach
                 </div>
+            @endif
+
+            {{-- Attribution has to be visible to count. Own photography and CC0
+                 sources leave credit null and this renders nothing. --}}
+            @php $credits = $product->images->pluck('credit')->filter()->unique(); @endphp
+            @if ($credits->isNotEmpty())
+                <p class="xsmall dim" style="margin-block-start:10px">
+                    مصدر الصور: {{ $credits->join(' · ') }}
+                </p>
             @endif
         </div>
 
@@ -47,8 +60,8 @@
                         </span>
                     </div>
                     <p class="small muted" style="margin-block-start:4px">
-                        متاح لدى {{ $board->sellersCount() }}
-                        {{ $board->sellersCount() === 1 ? 'متجر' : 'متاجر' }} في {{ config('banha.city') }}
+                        متاح لدى {{ arabic_count($board->sellersCount(), 'متجر واحد', 'متجرين', 'متاجر', 'متجرًا') }}
+                        في {{ config('banha.city') }}
                     </p>
                 </div>
             @endif

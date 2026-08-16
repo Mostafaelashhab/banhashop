@@ -39,6 +39,47 @@ class SearchTest extends TestCase
         }
     }
 
+    /**
+     * InnoDB ignores tokens below its minimum length, so a two-letter query
+     * takes the LIKE fallback — which projects no relevance column. Relevance
+     * is also the default sort, so ordering by it here asked MySQL for a column
+     * that was never selected and the page died with SQLSTATE 42S22.
+     */
+    public function test_a_term_too_short_for_the_fulltext_index_still_returns_results(): void
+    {
+        Product::factory()->create(['name' => 'Samsung Galaxy S25']);
+
+        $this->get(route('search', ['q' => 'sa']))
+            ->assertOk()
+            ->assertSee('Samsung Galaxy S25', false);
+    }
+
+    public function test_a_short_term_survives_every_sort_option(): void
+    {
+        Product::factory()->create(['name' => 'Samsung Galaxy S25']);
+
+        foreach (\App\Services\Catalog\ProductQueryService::SORTS as $sort) {
+            $this->get(route('search', ['q' => 'sa', 'sort' => $sort]))
+                ->assertOk();
+        }
+    }
+
+    /**
+     * Not a regression test — this passed before the relevance fix too. It pins
+     * an invariant nothing else asserts: normalisation drops every character
+     * outside letters, digits and spaces, so a user cannot inject FULLTEXT
+     * boolean operators into the MATCH expression. Loosen that regex and a
+     * query of "+++" starts building "+*", which MySQL rejects outright.
+     */
+    public function test_a_query_of_only_boolean_operators_does_not_break_search(): void
+    {
+        Product::factory()->create(['name' => 'Samsung Galaxy S25']);
+
+        foreach (['+++', '***', '>><<', '~~~ (((' ] as $term) {
+            $this->get(route('search', ['q' => $term]))->assertOk();
+        }
+    }
+
     public function test_a_barcode_goes_straight_to_the_product(): void
     {
         $product = Product::factory()->create(['barcode' => '194253000011']);

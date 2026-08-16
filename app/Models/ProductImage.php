@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['product_id', 'path', 'alt', 'width', 'height', 'position'])]
+#[Fillable(['product_id', 'path', 'alt', 'credit', 'width', 'height', 'position'])]
 class ProductImage extends Model
 {
     public function product(): BelongsTo

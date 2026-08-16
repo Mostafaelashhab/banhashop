@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" aria-hidden="true">
+  <!--
+    Shown wherever a product has no photograph yet. Deliberately a package
+    outline and not a picture of anything: a generic product shot would
+    misrepresent what the store is actually selling, which on a price
+    comparison site is the one thing that must stay true.
+  -->
+  <rect width="400" height="400" fill="#eef3f1"/>
+  <g fill="none" stroke="#0b5c4b" stroke-opacity=".22" stroke-width="11"
+     stroke-linejoin="round" stroke-linecap="round">
+    <path d="M200 128 282 167v79l-82 39-82-39v-79z"/>
+    <path d="m118 167 82 39 82-39"/>
+    <path d="M200 206v79"/>
+  </g>
+</svg>

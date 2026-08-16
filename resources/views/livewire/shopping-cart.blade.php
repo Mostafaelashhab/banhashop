@@ -1,6 +1,7 @@
 <div>
     @if ($summary->isEmpty())
         <x-ui.empty
+            illustration="cart"
             title="سلتك فاضية"
             text="ابدأ من الأقسام أو ابحث عن المنتج اللي محتاجه، وقارن عروض متاجر {{ config('banha.city') }}."
         >
@@ -41,7 +42,8 @@
                         @foreach ($group->items as $item)
                             <div class="cart-line" wire:key="item-{{ $item->id }}">
                                 <a href="{{ $item->product->url() }}" tabindex="-1" aria-hidden="true">
-                                    <x-product.thumb :product="$item->product" :size="72" class="cart-line__media" />
+                                    <x-product.thumb :product="$item->product" :size="72"
+                                                     class="cart-line__media" sizes="72px" />
                                 </a>
 
                                 <div style="min-width:0">
