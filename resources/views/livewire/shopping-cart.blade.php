@@ -130,7 +130,7 @@
                 @endforeach
             </div>
 
-            <aside class="panel" style="position:sticky;top:calc(var(--header-h) + 12px)">
+            <aside class="panel summary-aside">
                 <div class="panel__head"><h2>ملخص الطلب</h2></div>
                 <div class="panel__body">
                     <div class="totals">
@@ -156,7 +156,7 @@
                 </div>
                 <div class="panel__foot">
                     <a href="{{ route('checkout.show') }}"
-                       class="btn btn--primary btn--lg btn--block"
+                       class="btn btn--primary btn--lg btn--block summary-aside__cta"
                        @if (! $summary->canCheckout()) aria-disabled="true" @endif>
                         إتمام الطلب
                     </a>
@@ -165,6 +165,23 @@
                     </p>
                 </div>
             </aside>
+        </div>
+
+        {{-- On a phone the summary is just the last block on a long page, so
+             the total and the action ride along at the bottom of the viewport
+             instead of waiting at the end of it. --}}
+        <div class="sticky-bar">
+            <div class="sticky-bar__inner">
+                <div class="sticky-bar__total">
+                    <div class="sticky-bar__label">الإجمالي النهائي</div>
+                    <div class="sticky-bar__amount num">{{ money($summary->grandTotalCents()) }}</div>
+                </div>
+                <a href="{{ route('checkout.show') }}"
+                   class="btn btn--primary btn--lg"
+                   @if (! $summary->canCheckout()) aria-disabled="true" @endif>
+                    إتمام الطلب
+                </a>
+            </div>
         </div>
     @endif
 </div>

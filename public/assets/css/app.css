@@ -153,7 +153,7 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
 .section { margin-block-start: 36px; }
 .section__head {
   display: flex; align-items: baseline; justify-content: space-between;
-  gap: 12px; margin-block-end: 14px;
+  flex-wrap: wrap; gap: 12px; margin-block-end: 14px;
 }
 .section__head h2 { margin: 0; }
 .section__link { color: var(--brand); font-size: .88rem; font-weight: 600; white-space: nowrap; }
@@ -186,7 +186,8 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
 .panel__head {
   padding: 14px 16px;
   border-block-end: 1px solid var(--line);
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
 }
 .panel__head h2, .panel__head h3 { font-size: 1rem; margin: 0; }
 .panel__body { padding: 16px; }
@@ -484,20 +485,30 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
   .zone-picker__label { display: none; }
 }
 
+/* The header is two rows on a phone, not the 60px of the desktop bar. Sticky
+   offsets and anchor scroll positions are computed from this, so it has to
+   track reality or every in-page link lands under the header. */
 @media (max-width: 767px) {
-  .site-header__bar { flex-wrap: wrap; }
-  /* Row 1: brand, zone, actions. Row 2: search, full width. */
+  :root { --header-h: 104px; }
+}
+
+/* Row 1 was brand + zone + actions, and on a 360px screen that does not fit:
+   brand (~110px) + zone (~155px) + actions (~120px) overflows the 328px of
+   content width by a wide margin, so the bar wrapped to three rows and the
+   sticky header ate a third of the viewport. Brand and actions own row 1;
+   search and the zone share row 2, with search taking the slack. */
+@media (max-width: 767px) {
+  .site-header__bar { flex-wrap: wrap; column-gap: 10px; row-gap: 8px; }
   .brand { order: 1; }
-  .zone-picker { order: 2; }
-  .header-actions { order: 3; }
-  .header-search { order: 4; flex-basis: 100%; max-width: none; }
-  .zone-picker { padding-inline: 9px; gap: 5px; }
-  .zone-picker__select { max-width: 118px; font-size: .82rem; }
+  .header-actions { order: 2; margin-inline-start: auto; }
+  .header-search { order: 3; flex: 1 1 180px; max-width: none; }
+  .zone-picker { order: 4; flex: 0 1 auto; min-width: 0; padding-inline: 9px; gap: 5px; }
+  .zone-picker__select { max-width: 116px; }
 }
 
 @media (max-width: 380px) {
   .brand__city { display: none; }
-  .zone-picker__select { max-width: 92px; }
+  .zone-picker__select { max-width: 96px; }
 }
 
 /* --------------------------------------------------------------------------
@@ -511,6 +522,24 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
 }
 .breadcrumbs a:hover { color: var(--ink); }
 .breadcrumbs [aria-current="page"] { color: var(--ink-2); }
+
+/* --------------------------------------------------------------------------
+   10b. Catalog toolbar (count + sort/filter)
+   -------------------------------------------------------------------------- */
+.catalog-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-block-end: 16px;
+}
+.catalog-toolbar__filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.catalog-toolbar__filters .select { width: auto; min-width: 150px; }
+
+/* Two 150px selects plus their gap need 308px, which is all the content width
+   a 360px phone has. Given a full row of their own they split it evenly
+   instead of shunting the count line around. */
+@media (max-width: 599px) {
+  .catalog-toolbar__filters { width: 100%; }
+  .catalog-toolbar__filters .select { flex: 1 1 140px; min-width: 0; }
+}
 
 /* --------------------------------------------------------------------------
    11. Product cards
@@ -619,7 +648,8 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
 .offer-row--best { background: var(--good-tint); }
 .offer-row--best .offer-row__total { color: var(--good); }
 
-.offer-row__store { grid-column: 1 / -1; display: flex; align-items: center; gap: 9px; }
+.offer-row__store { grid-column: 1 / -1; display: flex; align-items: center; gap: 9px; min-width: 0; }
+.offer-row__store > div { min-width: 0; }
 .offer-row__logo {
   width: 34px; height: 34px; flex: none; border-radius: var(--radius-sm);
   background: var(--canvas-2); object-fit: contain;
@@ -638,7 +668,7 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
   padding-block-start: 10px;
   border-block-start: 1px dashed var(--line);
 }
-.offer-cell { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.offer-cell { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0; }
 .offer-cell__label { font-size: .8rem; color: var(--ink-2); }
 .offer-cell__value { font-size: .92rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 .offer-row__total { font-size: 1.12rem; font-weight: 800; }
@@ -776,10 +806,13 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
 /* --------------------------------------------------------------------------
    19. Sticky action bar (mobile buy bar / checkout)
    -------------------------------------------------------------------------- */
+/* Stays in flow rather than fixed, so it never covers the last line of the
+   page and needs no compensating bottom padding. */
 .sticky-bar {
   position: sticky; inset-block-end: 0; z-index: 30;
   background: var(--surface); box-shadow: var(--shadow-bar);
-  padding: 10px 0; margin-block-start: 24px;
+  margin-block-start: 24px;
+  padding-block: 10px calc(10px + env(safe-area-inset-bottom, 0px));
 }
 .sticky-bar__inner { display: flex; align-items: center; gap: 12px; }
 .sticky-bar__total { flex: 1; min-width: 0; }
@@ -1017,7 +1050,106 @@ details > summary::before {
 details[open] > summary::before { content: "−"; }
 
 /* --------------------------------------------------------------------------
-   28. Print / motion
+   28. Touch & small-screen refinements
+   Everything above is written mobile-first. This section is for the places
+   where a touch screen needs different behaviour, not a narrower version of
+   the same behaviour.
+   -------------------------------------------------------------------------- */
+
+/* The offer board's sort links jump to #offers-heading. Without this the
+   heading lands underneath the sticky header every time. */
+[id] { scroll-margin-block-start: calc(var(--header-h) + 12px); }
+
+/* Arabic product names, store names and emailed addresses are long and
+   unbreakable often enough that one of them will eventually push a 320px
+   layout sideways. */
+body { overflow-wrap: break-word; }
+
+/* Scrollable strips should not chain their scroll to the page — on iOS that
+   overscroll triggers the browser's back gesture mid-swipe. */
+.table-wrap, .nav-bar__list, .dash-nav, .gallery__thumbs {
+  overscroll-behavior-inline: contain;
+}
+
+@media (max-width: 767px) {
+  /* 15px is a desktop reading size. */
+  body { font-size: 16px; }
+
+  /* A strip clipped flush against the container padding reads as a broken
+     layout; clipped at the screen edge it reads as "there is more, scroll". */
+  .nav-bar .container { padding-inline: 0; }
+  .nav-bar__list { padding-inline: 16px; }
+}
+
+/* iOS Safari zooms the viewport whenever a focused control's text is under
+   16px, and does not zoom back out afterwards. Every input here sat between
+   13.8px and 15.2px, so search, checkout and every dashboard form left the
+   user stranded at 1.4x zoom until they pinched out by hand. */
+@media (pointer: coarse) {
+  .input, .select, .textarea,
+  .search-form__input, .zone-picker__select { font-size: 16px; }
+
+  /* 34-40px is comfortable with a mouse and fiddly with a thumb. These are
+     the controls tapped repeatedly in a session, raised to the 44px target
+     size Apple's HIG and WCAG 2.5.5 both land on. */
+  .btn--sm { min-height: 40px; }
+  .icon-btn--sm { width: 40px; height: 40px; }
+  .offers__sort, .pill { min-height: 40px; }
+  .pagination__item { min-width: 44px; height: 44px; }
+  .header-action { height: 44px; }
+  .nav-bar__link { padding-block: 12px; }
+  .dash-nav__link { min-height: 40px; }
+  .search-form__submit { width: var(--control); }
+
+  /* The most-tapped control in the cart had the smallest target on the page. */
+  .qty button { width: 42px; height: 42px; }
+  .qty__value { min-width: 40px; line-height: 42px; }
+}
+
+/* The total is the number this whole product exists to surface. The desktop
+   table has a column header saying so; the mobile card rendered it as one of
+   four interchangeable rows. Pulled out full width and separated. */
+@media (max-width: 859px) {
+  .offer-cell--total {
+    /* Source order is the desktop column order, which has to keep matching
+       .offers__head. On the card the total belongs last, after the figures
+       it is the sum of. */
+    order: 1;
+    grid-column: 1 / -1;
+    margin-block-start: 2px;
+    padding-block-start: 8px;
+    border-block-start: 1px dashed var(--line);
+  }
+  .offer-cell--total .offer-cell__label {
+    font-size: .85rem; font-weight: 600; color: var(--ink);
+  }
+}
+
+/* Below ~420px two figure columns leave about 120px per cell, which is less
+   than a label and a price need side by side, so they collided. */
+@media (max-width: 419px) {
+  .offer-row__figures { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Order summary: pinned alongside the content on desktop. On a phone the
+   split collapses and the summary is simply the last block on a long page,
+   so pinning it does nothing and the checkout button ends up below the fold.
+   The action travels in the sticky bar instead. */
+@media (min-width: 900px) {
+  .summary-aside { position: sticky; inset-block-start: calc(var(--header-h) + 12px); }
+  .sticky-bar { display: none; }
+}
+
+/* One primary action per screen. On a phone the sticky bar carries it, and
+   the copy in the summary foot would sit directly above the bar as a second,
+   less reachable version of the same button. The reassurance note under it
+   stays either way. */
+@media (max-width: 899px) {
+  .summary-aside__cta { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   29. Print / motion
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

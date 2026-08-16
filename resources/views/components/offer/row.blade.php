@@ -70,7 +70,7 @@
             </span>
         </div>
 
-        <div class="offer-cell">
+        <div class="offer-cell offer-cell--total">
             <span class="offer-cell__label">الإجمالي</span>
             <span class="offer-cell__value offer-row__total">
                 {{ $compared->totalCents() !== null ? money($compared->totalCents()) : '—' }}

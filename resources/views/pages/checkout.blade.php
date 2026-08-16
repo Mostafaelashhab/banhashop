@@ -119,7 +119,7 @@
             </form>
         </div>
 
-        <aside class="panel" style="position:sticky;top:calc(var(--header-h) + 12px)">
+        <aside class="panel summary-aside">
             <div class="panel__head"><h2>ملخص الطلب</h2></div>
             <div class="panel__body">
                 @foreach ($summary->groups as $group)
@@ -162,7 +162,8 @@
                 </div>
             </div>
             <div class="panel__foot">
-                <button type="submit" form="checkout-form" class="btn btn--primary btn--lg btn--block"
+                <button type="submit" form="checkout-form"
+                        class="btn btn--primary btn--lg btn--block summary-aside__cta"
                         @disabled(! $summary->canCheckout() || $selectedAddress === null)>
                     تأكيد الطلب
                 </button>
@@ -171,5 +172,21 @@
                 </p>
             </div>
         </aside>
+    </div>
+
+    {{-- On a phone the address, delivery and payment sections push the summary
+         well past the fold, so the total and the confirm button ride along at
+         the bottom of the viewport. --}}
+    <div class="sticky-bar">
+        <div class="sticky-bar__inner">
+            <div class="sticky-bar__total">
+                <div class="sticky-bar__label">الإجمالي</div>
+                <div class="sticky-bar__amount num">{{ money($summary->grandTotalCents()) }}</div>
+            </div>
+            <button type="submit" form="checkout-form" class="btn btn--primary btn--lg"
+                    @disabled(! $summary->canCheckout() || $selectedAddress === null)>
+                تأكيد الطلب
+            </button>
+        </div>
     </div>
 </x-layouts.app>
