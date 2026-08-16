@@ -28,6 +28,7 @@
          a generic image that is not this product. Derived from the name alone,
          so this component never forces an extra relation to be loaded. --}}
     <span class="thumb-fallback {{ $class }}" aria-hidden="true">
-        {{ mb_substr($alt, 0, 2) }}
+        <x-ui.icon name="package" :size="26" class="thumb-fallback__icon" />
+        <span class="thumb-fallback__text">{{ mb_substr($alt, 0, 2) }}</span>
     </span>
 @endif

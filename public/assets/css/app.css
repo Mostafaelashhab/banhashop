@@ -44,6 +44,11 @@
   --shadow-pop: 0 6px 24px rgba(20, 24, 29, .12);
   --shadow-bar: 0 -1px 0 var(--line), 0 -8px 24px rgba(20, 24, 29, .06);
 
+  /* Hairline borders alone read as wireframe. One step of elevation on the
+     resting state and one on hover is what separates "unstyled" from "built". */
+  --shadow-sm:  0 1px 2px rgba(20, 24, 29, .04), 0 1px 3px rgba(20, 24, 29, .05);
+  --shadow-md:  0 2px 4px rgba(20, 24, 29, .04), 0 8px 20px rgba(20, 24, 29, .08);
+
   --container:  1180px;
   --header-h:   60px;
 
@@ -155,7 +160,14 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
   display: flex; align-items: baseline; justify-content: space-between;
   flex-wrap: wrap; gap: 12px; margin-block-end: 14px;
 }
-.section__head h2 { margin: 0; }
+/* A brand rule beside the heading gives each band of the page a visible start.
+   Without it the sections read as one undifferentiated column of boxes. */
+.section__head h2 { margin: 0; position: relative; padding-inline-start: 13px; }
+.section__head h2::before {
+  content: ""; position: absolute;
+  inset-inline-start: 0; inset-block: .16em;
+  width: 4px; border-radius: 999px; background: var(--brand);
+}
 .section__link { color: var(--brand); font-size: .88rem; font-weight: 600; white-space: nowrap; }
 
 /* --------------------------------------------------------------------------
@@ -182,6 +194,7 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 .panel__head {
   padding: 14px 16px;
@@ -498,12 +511,24 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
    sticky header ate a third of the viewport. Brand and actions own row 1;
    search and the zone share row 2, with search taking the slack. */
 @media (max-width: 767px) {
-  .site-header__bar { flex-wrap: wrap; column-gap: 10px; row-gap: 8px; }
+  .site-header__bar { flex-wrap: wrap; column-gap: 10px; row-gap: 4px; }
+
+  /* A full-width zero-height flex item forces a line break at a fixed point in
+     the order. Sizing the rows by flex-basis instead would depend on how wide
+     brand and actions happen to be, and actions changes width with the signed-in
+     role — which is exactly how the zone picker ended up alone on its own row.
+     The dashboard reuses this bar with no search and no zone, so it keeps its
+     single row and the --header-h floor meant for the two-row storefront. */
+  .site-header__bar:has(.header-search)::after { content: ""; order: 2; width: 100%; height: 0; }
+  .site-header__bar:not(:has(.header-search)) { min-height: var(--control-lg); }
+
   .brand { order: 1; }
-  .header-actions { order: 2; margin-inline-start: auto; }
-  .header-search { order: 3; flex: 1 1 180px; max-width: none; }
-  .zone-picker { order: 4; flex: 0 1 auto; min-width: 0; padding-inline: 9px; gap: 5px; }
-  .zone-picker__select { max-width: 116px; }
+  .header-actions { order: 1; margin-inline-start: auto; }
+
+  /* Row 2 belongs to search; the zone takes only what it needs beside it. */
+  .header-search { order: 3; flex: 1 1 auto; max-width: none; }
+  .zone-picker { order: 3; flex: 0 0 auto; min-width: 0; padding-inline: 9px; gap: 5px; }
+  .zone-picker__select { max-width: 104px; }
 }
 
 @media (max-width: 380px) {
@@ -559,11 +584,21 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: border-color .12s ease;
+  box-shadow: var(--shadow-sm);
+  transition: border-color .14s ease, box-shadow .14s ease, transform .14s ease;
 }
-.product-card:hover { border-color: var(--ink-3); }
+/* Lift only where there is a cursor to lift under — on a touch screen the
+   hover state latches after the tap and the card stays raised. */
+@media (hover: hover) {
+  .product-card:hover {
+    border-color: var(--brand);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+}
 .product-card__media {
-  aspect-ratio: 1 / 1; background: var(--canvas-2);
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(160deg, #fff 0%, var(--canvas-2) 100%);
   display: grid; place-items: center; overflow: hidden;
 }
 .product-card__media img { width: 100%; height: 100%; object-fit: contain; padding: 10px; }
@@ -576,18 +611,24 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
 .product-card a.product-card__title:hover { text-decoration: underline; }
 .product-card__price { margin-block-start: auto; padding-block-start: 6px; }
 .product-card__from { font-size: .72rem; color: var(--ink-3); }
-.product-card__amount { font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.product-card__amount { font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--brand-ink); }
 .product-card__offers { font-size: .76rem; color: var(--brand-ink); font-weight: 600; }
 .product-card__empty { font-size: .76rem; color: var(--ink-3); }
 
-/* Placeholder for products with no photograph yet. Neutral by design — a
-   generic stock image would misrepresent the product. */
+/* Placeholder for products with no photograph yet. Still no invented stock
+   photography — a generic image would misrepresent the product — but a flat
+   grey box with two letters in it reads as a broken image rather than a
+   deliberate one. Branded, lit, and carrying an icon, it reads as "no photo
+   yet" instead of "this page failed to load". */
 .thumb-fallback {
-  display: grid; place-items: center;
+  display: grid; place-items: center; align-content: center; gap: 4px;
   width: 100%; height: 100%; min-height: 72px;
-  background: var(--canvas-2); color: var(--ink-3);
-  font-weight: 700; font-size: 1.1rem; letter-spacing: .04em;
+  background: linear-gradient(150deg, var(--brand-tint) 0%, var(--canvas-2) 100%);
+  color: var(--brand);
+  font-weight: 800; letter-spacing: .04em;
 }
+.thumb-fallback__icon { opacity: .45; }
+.thumb-fallback__text { font-size: .95rem; opacity: .7; }
 
 /* --------------------------------------------------------------------------
    12. Price block (product page)
@@ -609,7 +650,11 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
    on a shared grid. Labels are visible on mobile and hidden on desktop where
    the column header already says what each number is.
    -------------------------------------------------------------------------- */
-.offers { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
+.offers {
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: var(--surface); box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
 
 .offers__toolbar {
   display: flex; align-items: center; justify-content: space-between;
@@ -652,8 +697,8 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
 .offer-row__store > div { min-width: 0; }
 .offer-row__logo {
   width: 34px; height: 34px; flex: none; border-radius: var(--radius-sm);
-  background: var(--canvas-2); object-fit: contain;
-  display: grid; place-items: center; font-weight: 700; color: var(--ink-2);
+  background: var(--brand-tint); object-fit: contain;
+  display: grid; place-items: center; font-weight: 800; color: var(--brand);
   font-size: .8rem; border: 1px solid var(--line);
 }
 .offer-row__name { font-weight: 700; font-size: .95rem; }
@@ -726,11 +771,16 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
   display: flex; gap: 12px; align-items: flex-start;
   padding: 14px; background: var(--surface);
   border: 1px solid var(--line); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: border-color .14s ease, box-shadow .14s ease;
+}
+@media (hover: hover) {
+  .seller-card:hover { border-color: var(--brand); box-shadow: var(--shadow-md); }
 }
 .seller-card__logo {
   width: 46px; height: 46px; flex: none; border-radius: var(--radius);
-  border: 1px solid var(--line); background: var(--canvas-2);
-  display: grid; place-items: center; font-weight: 700; color: var(--ink-2);
+  border: 1px solid var(--line); background: var(--brand-tint);
+  display: grid; place-items: center; font-weight: 800; color: var(--brand);
   object-fit: contain;
 }
 .seller-card__name { font-weight: 700; }
@@ -777,9 +827,9 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
 .alert li::before { content: "•"; margin-inline-end: 7px; color: currentColor; opacity: .6; }
 
 .empty {
-  padding: 32px 20px; text-align: center;
+  padding: 36px 20px; text-align: center;
   border: 1px dashed var(--line); border-radius: var(--radius-lg);
-  background: var(--surface);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--canvas) 100%);
 }
 .empty__title { font-weight: 700; font-size: 1rem; margin-block-end: 5px; }
 .empty__text { color: var(--ink-2); font-size: .9rem; max-width: 46ch; margin-inline: auto; }
@@ -877,6 +927,7 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
 .stat {
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius-lg); padding: 14px;
+  box-shadow: var(--shadow-sm);
 }
 .stat__label { font-size: .78rem; color: var(--ink-3); font-weight: 600; }
 .stat__value { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
@@ -885,38 +936,72 @@ hr { border: 0; border-block-start: 1px solid var(--line); margin: 1.25rem 0; }
 /* --------------------------------------------------------------------------
    22. Hero / home
    -------------------------------------------------------------------------- */
+/* The first screen has no product photography to lean on — the catalog may be
+   young and a placeholder grid is a bleak first impression. The hero carries
+   the brand instead, so the page opens with colour and depth rather than a
+   white rectangle on a grey field. */
 .hero {
-  background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--radius-lg); padding: 22px 20px;
+  position: relative; overflow: hidden; isolation: isolate;
+  background: linear-gradient(135deg, var(--brand-ink) 0%, var(--brand) 48%, #12836c 100%);
+  color: #fff;
+  border: 0;
+  border-radius: 14px;
+  padding: 30px 22px;
+  box-shadow: var(--shadow-md);
 }
-.hero__title { font-size: clamp(1.35rem, 1.1rem + 1.6vw, 1.85rem); letter-spacing: -.02em; }
-.hero__text { color: var(--ink-2); max-width: 58ch; margin-block-start: 8px; }
+.hero::before {
+  content: ""; position: absolute; z-index: -1;
+  inset-block-start: -55%; inset-inline-end: -12%;
+  width: 420px; height: 420px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, .14), transparent 70%);
+}
+.hero__title { font-size: clamp(1.45rem, 1.1rem + 1.9vw, 2.1rem); letter-spacing: -.02em; }
+.hero__text { color: rgba(255, 255, 255, .82); max-width: 58ch; margin-block-start: 10px; }
 .hero__steps {
-  display: grid; gap: 10px; margin-block-start: 18px;
+  display: grid; gap: 10px; margin-block-start: 22px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 @media (min-width: 760px) { .hero__steps { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .hero__step {
   display: flex; gap: 9px; align-items: flex-start;
-  padding: 11px 12px; border: 1px solid var(--line-2);
-  border-radius: var(--radius); background: var(--canvas);
+  padding: 12px 13px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, .10);
+  backdrop-filter: blur(2px);
 }
 .hero__step-num {
   width: 21px; height: 21px; flex: none; border-radius: 50%;
-  background: var(--ink); color: #fff; font-size: .72rem; font-weight: 700;
+  background: #fff; color: var(--brand-ink); font-size: .72rem; font-weight: 800;
   display: grid; place-items: center; margin-block-start: 1px;
 }
-.hero__step-text { font-size: .84rem; font-weight: 600; line-height: 1.45; }
+.hero__step-text { font-size: .84rem; font-weight: 600; line-height: 1.45; color: #fff; }
 
 .category-strip { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 640px)  { .category-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 1000px) { .category-strip { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
 .category-tile {
-  display: flex; flex-direction: column; gap: 3px;
-  padding: 13px; background: var(--surface);
-  border: 1px solid var(--line); border-radius: var(--radius);
+  display: flex; align-items: center; gap: 11px;
+  padding: 12px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: border-color .14s ease, box-shadow .14s ease, transform .14s ease;
 }
-.category-tile:hover { text-decoration: none; border-color: var(--ink-3); }
+@media (hover: hover) {
+  .category-tile:hover {
+    text-decoration: none; border-color: var(--brand);
+    box-shadow: var(--shadow-md); transform: translateY(-2px);
+  }
+}
+/* A tile that is only two lines of grey text is indistinguishable from an
+   empty state, which is the wrong signal for a category with stock in it. */
+.category-tile__icon {
+  width: 38px; height: 38px; flex: none;
+  border-radius: 10px;
+  background: var(--brand-tint); color: var(--brand);
+  display: grid; place-items: center;
+}
+.category-tile__body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .category-tile__name { font-weight: 600; font-size: .89rem; }
 .category-tile__count { font-size: .76rem; color: var(--ink-3); }
 

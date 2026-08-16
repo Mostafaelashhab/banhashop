@@ -33,11 +33,27 @@
                 <a href="{{ route('products.index') }}" class="section__link">كل المنتجات</a>
             </div>
 
+            @php
+                // Presentational only, and every category still renders without
+                // an entry here — an unmapped slug falls back to the tag icon.
+                $categoryIcons = [
+                    'mobile-phones'   => 'phone',
+                    'computers'       => 'grid',
+                    'electronics'     => 'layers',
+                    'home-appliances' => 'package',
+                ];
+            @endphp
+
             <div class="category-strip">
                 @foreach ($categories as $category)
                     <a href="{{ route('categories.show', $category->slug) }}" class="category-tile">
-                        <span class="category-tile__name">{{ $category->name }}</span>
-                        <span class="category-tile__count num">{{ $category->products_count }} منتج</span>
+                        <span class="category-tile__icon">
+                            <x-ui.icon :name="$categoryIcons[$category->slug] ?? 'tag'" :size="19" />
+                        </span>
+                        <span class="category-tile__body">
+                            <span class="category-tile__name">{{ $category->name }}</span>
+                            <span class="category-tile__count num">{{ $category->products_count }} منتج</span>
+                        </span>
                     </a>
                 @endforeach
             </div>

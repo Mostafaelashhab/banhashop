@@ -3,6 +3,7 @@
 namespace App\Services\Catalog;
 
 use App\Enums\OfferStatus;
+use App\Enums\ProductStatus;
 use App\Enums\SellerStatus;
 use Illuminate\Support\Facades\DB;
 
@@ -79,17 +80,46 @@ class ProductAggregateUpdater
         }
     }
 
+    /**
+     * Products are filed against leaf categories, but the home page lists roots
+     * and a category page already queries its children alongside itself. Counting
+     * only direct children therefore reported 0 for every root while the page
+     * behind that tile listed products — so each category's own count is rolled
+     * up through its ancestors here.
+     */
     public function refreshCategoryCounts(): void
     {
-        DB::statement('
-            UPDATE categories c
-            LEFT JOIN (
-                SELECT category_id, COUNT(*) AS total
-                FROM products
-                WHERE status = ? AND offers_count > 0
-                GROUP BY category_id
-            ) p ON p.category_id = c.id
-            SET c.products_count = COALESCE(p.total, 0)
-        ', ['published']);
+        $direct = DB::table('products')
+            ->where('status', ProductStatus::Published->value)
+            ->where('offers_count', '>', 0)
+            ->whereNotNull('category_id')
+            ->groupBy('category_id')
+            ->pluck(DB::raw('COUNT(*)'), 'category_id');
+
+        $parents = DB::table('categories')->pluck('parent_id', 'id');
+        $totals = array_fill_keys($parents->keys()->all(), 0);
+
+        foreach ($direct as $categoryId => $count) {
+            $node = (int) $categoryId;
+
+            // Bounded like Category::ancestors(): a parent_id cycle is corrupt
+            // data, and it should not hang the seeder while we find that out.
+            for ($depth = 0; $node !== 0 && $depth < 10; $depth++) {
+                if (! array_key_exists($node, $totals)) {
+                    break;
+                }
+
+                $totals[$node] += $count;
+                $node = (int) ($parents[$node] ?? 0);
+            }
+        }
+
+        $current = DB::table('categories')->pluck('products_count', 'id');
+
+        foreach ($totals as $id => $total) {
+            if ((int) ($current[$id] ?? -1) !== $total) {
+                DB::table('categories')->where('id', $id)->update(['products_count' => $total]);
+            }
+        }
     }
 }
